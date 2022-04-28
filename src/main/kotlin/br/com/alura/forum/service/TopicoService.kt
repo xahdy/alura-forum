@@ -1,44 +1,48 @@
 package br.com.alura.forum.service
 
-import br.com.alura.forum.dto.NovoTopicoDto
+import br.com.alura.forum.dto.NovoTopicoForm
+import br.com.alura.forum.dto.TopicoView
+import br.com.alura.forum.mapper.TopicoFormMapper
+import br.com.alura.forum.mapper.TopicoViewMapper
 import br.com.alura.forum.model.Topico
 import org.springframework.stereotype.Service
 import java.util.*
+import java.util.stream.Collectors
 
 //permite que o spring gerencia e injete essa classe em outras classes controladas pelo spring
 @Service
 class TopicoService(
     private var topicos: List<Topico> = ArrayList(),
-    private val cursoService: CursoService,
-    private val usuarioService: UsuarioService
+    private val topicoViewMapper: TopicoViewMapper,
+    private val topicoFormMapper: TopicoFormMapper
 ) {
 
 
-    fun listar(): List<Topico> {
-        return topicos
+    fun listar(): List<TopicoView> {
+        //mapeia a stream, para cada topico retorna um topico view
+        return topicos.stream().map {
+            //chama o topicoviewmapper passando o topico como parametro para conversão.
+                t -> topicoViewMapper.map(t)
+        }.collect(Collectors.toList())
     }
 
-    fun buscarPorId(id: Long): Topico {
+    fun buscarPorId(id: Long): TopicoView {
         //api de stream e filtro para filtrar o topico que tem o id equivalente
-        return topicos.stream().filter({
-            //passado o topico t, encontrar o topico que tem o t.id == id
-                t ->
-            t.id == id
-            //pegar o primeiro elemento (unico tbm pq filtrou pelo id)
-        }).findFirst().get()
+       val topico = topicos.stream().filter {
+           //passado o topico t, encontrar o topico que tem o t.id == id
+               t ->
+           t.id == id
+           //pegar o primeiro elemento (unico tbm pq filtrou pelo id)
+       }.findFirst().get()
+
+        return topicoViewMapper.map(topico)
     }
 
-    fun cadastrar(dto: NovoTopicoDto) {
+    fun cadastrar(form: NovoTopicoForm) {
+        val topico = topicoFormMapper.map(form)
+        topico.id = topicos.size.toLong()+1
         //plus adiciona elementos e retorna o List com os novos valores
-        topicos = topicos.plus(
-            Topico(
-                id = topicos.size.toLong() + 1,
-                titulo = dto.titulo,
-                mensagem = dto.mensagem,
-                curso = cursoService.buscarPorId(dto.idCurso),
-                autor = usuarioService.buscarPorId(dto.idAutor)
-            )
-        )
+        topicos = topicos.plus(topico)
     }
 
 }
