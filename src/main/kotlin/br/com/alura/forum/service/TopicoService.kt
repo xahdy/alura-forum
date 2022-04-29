@@ -3,10 +3,12 @@ package br.com.alura.forum.service
 import br.com.alura.forum.dto.AtualizacaoTopicoForm
 import br.com.alura.forum.dto.NovoTopicoForm
 import br.com.alura.forum.dto.TopicoView
+import br.com.alura.forum.exception.NotFoundException
 import br.com.alura.forum.mapper.TopicoFormMapper
 import br.com.alura.forum.mapper.TopicoViewMapper
 import br.com.alura.forum.model.Topico
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException.NotFound
 import java.util.*
 import java.util.stream.Collectors
 
@@ -15,7 +17,8 @@ import java.util.stream.Collectors
 class TopicoService(
     private var topicos: List<Topico> = ArrayList(),
     private val topicoViewMapper: TopicoViewMapper,
-    private val topicoFormMapper: TopicoFormMapper
+    private val topicoFormMapper: TopicoFormMapper,
+    private val notFoundMessage: String = "Tópico não encontrado."
 ) {
 
 
@@ -35,7 +38,7 @@ class TopicoService(
                 t ->
             t.id == id
             //pegar o primeiro elemento (unico tbm pq filtrou pelo id)
-        }.findFirst().get()
+        }.findFirst().orElseThrow { NotFoundException(notFoundMessage) }
 
         return topicoViewMapper.map(topico)
     }
@@ -54,7 +57,7 @@ class TopicoService(
 
         val topico = topicos.stream().filter { t ->
             t.id == form.id
-        }.findFirst().get()
+        }.findFirst().orElseThrow { NotFoundException(notFoundMessage) }
         //topicoAtualizado recebe as informações novas pelo form e mantem as antigas que estão dentro de topico
         val topicoAtualizado = Topico(
             id = form.id,
@@ -77,7 +80,8 @@ class TopicoService(
         //filtra todos os tópicos até encontrar o tópico que tem a id recebida por parametro e armazena essa informação dentro da val topico
         val topico = topicos.stream().filter { t ->
             t.id == id
-        }.findFirst().get()
+            //se não encontrar o registro, lança a nossa exception.
+        }.findFirst().orElseThrow { NotFoundException(notFoundMessage) }
         //minus remove o tópico informado da lista de topicos.
         topicos = topicos.minus(topico)
     }

@@ -47,6 +47,7 @@ class TopicoController(private val service: TopicoService) {
     }
 
     @DeleteMapping("/{id}")
+    //Apresenta o código 204 de no content
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deletar(@PathVariable id: Long) {
         service.deletar(id)
