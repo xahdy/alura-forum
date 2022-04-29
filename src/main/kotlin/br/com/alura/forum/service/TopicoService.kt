@@ -40,21 +40,23 @@ class TopicoService(
         return topicoViewMapper.map(topico)
     }
 
-    fun cadastrar(form: NovoTopicoForm) {
+    //retorna um TopicoView para que possamos usar as informações do tópico cadastrado no nosso controller.
+    fun cadastrar(form: NovoTopicoForm): TopicoView {
         val topico = topicoFormMapper.map(form)
         topico.id = topicos.size.toLong() + 1
         //plus adiciona elementos e retorna o List com os novos valores
         topicos = topicos.plus(topico)
+        //ViewMapper mapeia o topico recem criado
+        return topicoViewMapper.map(topico)
     }
 
-    fun atualizar(form: AtualizacaoTopicoForm) {
+    fun atualizar(form: AtualizacaoTopicoForm): TopicoView {
 
         val topico = topicos.stream().filter { t ->
             t.id == form.id
         }.findFirst().get()
-        //remove o topico da lista e adiciona um novo, utilizando o form para os dados modificados
-        // e utilizando as informações dentro do topico velho para as infos que não foram alteradas
-        topicos = topicos.minus(topico).plus(Topico(
+        //topicoAtualizado recebe as informações novas pelo form e mantem as antigas que estão dentro de topico
+        val topicoAtualizado = Topico(
             id = form.id,
             titulo = form.titulo,
             mensagem = form.mensagem,
@@ -64,7 +66,19 @@ class TopicoService(
             status = topico.status,
             dataCriacao = topico.dataCriacao
 
-        ))
+        )
+        //remove o topico antigo da lista e adiciona o topico atualizado.
+        topicos = topicos.minus(topico).plus(topicoAtualizado)
+        return topicoViewMapper.map(topicoAtualizado)
 
+    }
+
+    fun deletar(id: Long) {
+        //filtra todos os tópicos até encontrar o tópico que tem a id recebida por parametro e armazena essa informação dentro da val topico
+        val topico = topicos.stream().filter { t ->
+            t.id == id
+        }.findFirst().get()
+        //minus remove o tópico informado da lista de topicos.
+        topicos = topicos.minus(topico)
     }
 }
