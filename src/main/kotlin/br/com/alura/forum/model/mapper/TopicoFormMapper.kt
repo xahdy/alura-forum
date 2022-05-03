@@ -1,4 +1,4 @@
-package br.com.alura.forum.mapper
+package br.com.alura.forum.model.mapper
 
 import br.com.alura.forum.dto.NovoTopicoForm
 import br.com.alura.forum.model.Topico

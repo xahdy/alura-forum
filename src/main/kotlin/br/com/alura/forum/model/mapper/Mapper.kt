@@ -1,4 +1,4 @@
-package br.com.alura.forum.mapper
+package br.com.alura.forum.model.mapper
 
 interface Mapper<T, U> {
 
