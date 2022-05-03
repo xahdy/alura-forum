@@ -21,6 +21,7 @@ class SecurityConfiguration(
         http?.
             //autoriza a requisição
         authorizeRequests()?.
+            antMatchers("/topicos")?.hasAuthority("LEITURA_ESCRITA")?.
             //qualquer requisição
         anyRequest()?.
             //tem que ser autenticada
